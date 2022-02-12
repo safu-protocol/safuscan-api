@@ -13,7 +13,7 @@ router.get('/api/info', async (req: Request, res: Response) => {
 router.post('/api/info', async (req: Request, res: Response) => {
     // 1.2
     // @TODO -> if the token info doesn't exist, query Moralis API, BSCscan and save the required data!
-    const { total_supply, burned_tokens } = req.body;
+    const { total_supply, burned_tokens } = req.body
 
     const tokenAdd = Token.build({ total_supply, burned_tokens })
     await tokenAdd.save()

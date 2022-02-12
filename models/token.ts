@@ -1,8 +1,8 @@
 import mongoose from 'mongoose'
 
 interface ISafuscanToken {
-    total_supply: Number;
-    burned_tokens: Number;
+    total_supply: Number
+    burned_tokens: Number
 }
 
 interface apiModelInterface extends mongoose.Model<TokenDoc> {
@@ -10,8 +10,8 @@ interface apiModelInterface extends mongoose.Model<TokenDoc> {
 }
 
 interface TokenDoc extends mongoose.Document {
-    total_supply: Number;
-    burned_tokens: Number;
+    total_supply: Number
+    burned_tokens: Number
 }
 
 const tokenSchema = new mongoose.Schema({
