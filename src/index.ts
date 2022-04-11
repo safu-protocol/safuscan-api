@@ -1,17 +1,17 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import mongoose, { ConnectOptions } from 'mongoose'
-import { json } from 'body-parser'
-import { infoRouter } from './routes/info'
+import express from 'express';
+import mongoose, { ConnectOptions } from 'mongoose';
+import { json } from 'body-parser';
+import { infoRouter } from './routes/info';
+import dotenv from 'dotenv';
 
-const app = express()
-app.use(json())
+const app = express();
+app.use(json());
 
 // Register routes
-app.use(infoRouter)
+app.use(infoRouter);
 
 // Load .env variables
-dotenv.config()
+dotenv.config();
 
 mongoose.connect(
     process.env.MONGO_AUTH_URL!, {
@@ -20,8 +20,8 @@ mongoose.connect(
     } as ConnectOptions
 )
     .then(result => console.log('Connected to database'))
-    .catch(err => console.log(err))
+    .catch(err => console.log(err));
 
 app.listen(3000, () => {
     console.log('server is listening on port 3000!')
-})
+});
