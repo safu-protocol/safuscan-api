@@ -1,4 +1,4 @@
-export class tokenMetaData {
+export class TokenMetaData {
     address?: string;
     name?: string;
     symbol?: string;
