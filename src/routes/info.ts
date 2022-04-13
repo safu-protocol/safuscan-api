@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { getCirculatingSupply, getTokenTotalSupply } from '../../services/bsc-scan.service';
 import { getTokenHolders } from '../../services/covalent.service';
+import { getHoneyPotInfo } from '../../services/honeypot.service';
 
 const router = express.Router();
 
@@ -18,7 +19,8 @@ async function lookForToken(contractAddress: string) {
     const totalSupply = (await getTokenTotalSupply(contractAddress)).result;
     const circulatingSupply = (await getCirculatingSupply(contractAddress)).result;
     const tokenHolders = (await getTokenHolders(contractAddress));
-    return `1 ${await totalSupply} 2 ${await circulatingSupply} 3 ${await tokenHolders}`
+    const honeyPotInfo = (await getHoneyPotInfo(contractAddress)).IsHoneypot;
+    return `1 ${await totalSupply} 2 ${await circulatingSupply} 3 ${await tokenHolders} 4 ${honeyPotInfo}`
 };
 
 export { router as infoRouter };
