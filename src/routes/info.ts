@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
-import Moralis from 'moralis/node';
 import { getCirculatingSupply, getTokenTotalSupply } from '../../services/bsc-scan.service';
+import { getTokenHolders } from '../../services/covalent.service';
 
 const router = express.Router();
 
@@ -14,28 +14,11 @@ router.get('/api/info', async (req: Request, res: Response) => {
     return res.status(200).send(await lookForToken(req.body.address));
 })
 
-// router.post('/api/info', async (req: Request, res: Response) => {
-    // 1.2
-    // @TODO -> if the token info doesn't exist, query Moralis API, BSCscan and save the required data!
-//     const { total_supply, burned_tokens } = req.body
-
-//     const tokenAdd = Token.build({ total_supply, burned_tokens });
-//     await tokenAdd.save();
-//     return res.status(201).send(tokenAdd);
-// })
-
 async function lookForToken(contractAddress: string) {
-    const metadata = await Moralis.Web3API.token.getTokenMetadata({
-        addresses: [contractAddress],
-        chain: "bsc"
-    }).catch(console.error);
-    const totalSupply = await getTokenTotalSupply(contractAddress);
-    const circulatingSupply = await getCirculatingSupply(contractAddress);
+    const totalSupply = (await getTokenTotalSupply(contractAddress)).result;
+    const circulatingSupply = (await getCirculatingSupply(contractAddress)).result;
+    const tokenHolders = (await getTokenHolders(contractAddress));
+    return `1 ${await totalSupply} 2 ${await circulatingSupply} 3 ${await tokenHolders}`
 };
-
-(async () => {
-    await Moralis.start({ serverUrl: moralisServerUrl, appId: moralisAppId, moralisSecret: moralisSecret });
-    console.log('Connected to API');
-})();
 
 export { router as infoRouter };
