@@ -8,7 +8,9 @@ export async function getTokenTotalSupply(contractAddress: string): Promise<BscS
     `&contractaddress=${contractAddress}` +
     `&apikey=${process.env.BSC_API_KEY}`
 
-    return await fetch(url).then(res => res.json()).then(json => new BscScanData(json))
+    return await fetch(url)
+        .then(res => res.json())
+        .then(json => new BscScanData(json));
 };
 
 export async function getCirculatingSupply(contractAddress: string): Promise<BscScanData> {
@@ -18,5 +20,7 @@ export async function getCirculatingSupply(contractAddress: string): Promise<Bsc
     `&contractaddress=${contractAddress}` +
     `&apikey=${process.env.BSC_API_KEY}`
 
-    return await fetch(url).then(res => res.json()).then(json => new BscScanData(json))
+    return await fetch(url)
+        .then(res => res.json())
+        .then(json => new BscScanData(json));
 }
