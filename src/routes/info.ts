@@ -18,10 +18,11 @@ router.get('/api/info', async (req: Request, res: Response) => {
 async function lookForToken(contractAddress: string) {
     const totalSupply = (await getTokenTotalSupply(contractAddress)).result;
     const circulatingSupply = (await getCirculatingSupply(contractAddress)).result;
-    const tokenHolders = (await getTokenHolders(contractAddress));
+    const tokenHoldersAmount = (await getTokenHolders(contractAddress))?.length;
     const honeyPotInfo = (await getHoneyPotInfo(contractAddress)).IsHoneypot;
     const burnedTokens = (await getBurnedTokenAmount(contractAddress));
-    return `1 ${await totalSupply} 2 ${await circulatingSupply} 3 ${await tokenHolders} 4 ${await honeyPotInfo} 5 ${await burnedTokens}`
+    const top10Holders = (await getTokenHolders(contractAddress, 10))?.map(tokenHolder => tokenHolder.address);
+    return `1 ${await totalSupply} 2 ${await circulatingSupply} 3 ${await tokenHoldersAmount} 4 ${await honeyPotInfo} 5 ${await burnedTokens} 6 ${await top10Holders}`;
 };
 
 export { router as infoRouter };
