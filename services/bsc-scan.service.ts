@@ -68,9 +68,22 @@ export async function getBurnedTokenAmount(contractAddress: string) {
     const accountBalance = async(burnAddress: string) => (await getAccountBalanceOfToken(contractAddress, burnAddress)).result 
 
    return burnAddressesList.map(async burnAddress => {
+    await new Promise(f => setTimeout(f, 200));
         const balance = await accountBalance(burnAddress);
         if(balance > 0) { 
             return balance
         }
     })[0];
+}
+
+export async function getContractSourceCode(contractAddress: string) {
+    const url = "https://api.bscscan.com/api" +
+    "?module=contract" +
+    "&action=getsourcecode" +
+    `&address=${contractAddress}` +
+    `&apikey=${process.env.BSC_API_KEY}`
+
+    return await fetch(url)
+        .then(res => res.json())
+        .then(json => new BscScanData(json));
 }

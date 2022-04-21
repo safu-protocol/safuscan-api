@@ -9,5 +9,7 @@ export async function getTokenHolders(contractAddress: string, pageSize: number 
 
     return await fetch(url)
         .then(res => res.json())
-        .then((json: any) => new CovalentResponse(json).data?.items);
+        .then((json: any) => { 
+            return new CovalentResponse(json).data?.items 
+        });
 };
