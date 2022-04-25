@@ -1,20 +1,20 @@
-import mongoose from 'mongoose'
+import mongoose, { Document, Schema, Model, model } from 'mongoose'
 
 interface ISafuscanToken {
     total_supply: Number
     burned_tokens: Number
 }
 
-interface apiModelInterface extends mongoose.Model<TokenDoc> {
+interface apiModelInterface extends Model<TokenDoc> {
     build(attr: ISafuscanToken): TokenDoc
 }
 
-interface TokenDoc extends mongoose.Document {
+interface TokenDoc extends Document {
     total_supply: Number
     burned_tokens: Number
 }
 
-const tokenSchema = new mongoose.Schema({
+const tokenSchema = new Schema({
     total_supply: {
         type: Number,
         required: true
@@ -29,7 +29,7 @@ tokenSchema.statics.build = (attr: ISafuscanToken) => {
     return new Token(attr)
 }
 
-const Token = mongoose.model<TokenDoc, apiModelInterface>('Token', tokenSchema)
+const Token = model<TokenDoc, apiModelInterface>('Token', tokenSchema)
 
 Token.build({
     total_supply: 1000,
