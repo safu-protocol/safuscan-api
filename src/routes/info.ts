@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import { getAccountBalanceOfToken, getCirculatingSupply, getTokenTotalSupply, getBurnedTokenAmount, getContractSourceCode } from '../../services/bsc-scan.service';
-import { getTokenHolders } from '../../services/covalent.service';
-import { getHoneyPotInfo } from '../../services/honeypot.service';
+import { getAccountBalanceOfToken, getCirculatingSupply, getTokenTotalSupply, getBurnedTokenAmount, getContractSourceCode } from '../services/bsc-scan.service';
+import { getTokenHolders } from '../services/covalent.service';
+import { getHoneyPotInfo } from '../services/honeypot.service';
 
 const router = express.Router();
 
