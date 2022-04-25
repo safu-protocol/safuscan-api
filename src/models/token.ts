@@ -31,13 +31,4 @@ tokenSchema.statics.build = (attr: ISafuscanToken) => {
 
 const Token = model<TokenDoc, apiModelInterface>('Token', tokenSchema)
 
-Token.build({
-    total_supply: 1000,
-    burned_tokens: 500
-})
-
 export { Token }
-
-
-
-
