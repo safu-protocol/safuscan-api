@@ -28,10 +28,10 @@ const burnAddressesList: string[] = [
 
 export async function getTokenTotalSupply(contractAddress: string): Promise<BscScanData> {
     const url = "https://api.bscscan.com/api" +
-    "?module=stats" +
-    "&action=tokensupply" +
-    `&contractaddress=${contractAddress}` +
-    `&apikey=${process.env.BSC_API_KEY}`
+        "?module=stats" +
+        "&action=tokensupply" +
+        `&contractaddress=${contractAddress}` +
+        `&apikey=${process.env.BSC_API_KEY}`
 
     return await fetch(url)
         .then(res => res.json())
@@ -40,10 +40,10 @@ export async function getTokenTotalSupply(contractAddress: string): Promise<BscS
 
 export async function getCirculatingSupply(contractAddress: string): Promise<BscScanData> {
     const url = "https://api.bscscan.com/api" +
-    "?module=stats" +
-    "&action=tokenCsupply" +
-    `&contractaddress=${contractAddress}` +
-    `&apikey=${process.env.BSC_API_KEY}`
+        "?module=stats" +
+        "&action=tokenCsupply" +
+        `&contractaddress=${contractAddress}` +
+        `&apikey=${process.env.BSC_API_KEY}`
 
     return await fetch(url)
         .then(res => res.json())
@@ -52,11 +52,11 @@ export async function getCirculatingSupply(contractAddress: string): Promise<Bsc
 
 export async function getAccountBalanceOfToken(contractAddress: string, accountAddress: string): Promise<BscScanData> {
     const url = "https://api.bscscan.com/api" +
-    "?module=account" +
-    "&action=tokenbalance" +
-    `&contractaddress=${contractAddress}` +
-    `&address=${accountAddress}` +
-    `&apikey=${process.env.BSC_API_KEY}`
+        "?module=account" +
+        "&action=tokenbalance" +
+        `&contractaddress=${contractAddress}` +
+        `&address=${accountAddress}` +
+        `&apikey=${process.env.BSC_API_KEY}`
 
     return await fetch(url)
         .then(res => res.json())
@@ -65,23 +65,25 @@ export async function getAccountBalanceOfToken(contractAddress: string, accountA
 
 export async function getBurnedTokenAmount(contractAddress: string) {
 
-    const accountBalance = async(burnAddress: string) => (await getAccountBalanceOfToken(contractAddress, burnAddress)).result 
+    const accountBalance = async (burnAddress: string) => (await getAccountBalanceOfToken(contractAddress, burnAddress)).result
 
-   return burnAddressesList.map(async burnAddress => {
-    await new Promise(f => setTimeout(f, 200));
+    return burnAddressesList.map(async (burnAddress, index) => {
+        await new Promise(resolve => setTimeout(resolve, 300 * index));
         const balance = await accountBalance(burnAddress);
-        if(balance > 0) { 
+        console.log(balance, 'hehe');
+        if (balance > 0) {
             return balance
         }
-    })[0];
+    }
+    )[0];
 }
 
 export async function getContractSourceCode(contractAddress: string) {
     const url = "https://api.bscscan.com/api" +
-    "?module=contract" +
-    "&action=getsourcecode" +
-    `&address=${contractAddress}` +
-    `&apikey=${process.env.BSC_API_KEY}`
+        "?module=contract" +
+        "&action=getsourcecode" +
+        `&address=${contractAddress}` +
+        `&apikey=${process.env.BSC_API_KEY}`
 
     return await fetch(url)
         .then(res => res.json())
