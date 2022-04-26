@@ -16,14 +16,14 @@ class ApiInfo {
     error_code?: string;
 }
 
-class CovalentTokenHolder {
+export class CovalentTokenHolder {
     contract_decimals?: string;
     contract_name?: string;
     contract_ticker_symbol?: string;
     contract_address?: string;
     supports_erc?: string;
     logo_url?: string;
-    address?: string;
+    address!: string;
     balance?: string;
     total_supply?: string;
     block_height?: string;
