@@ -12,6 +12,7 @@ const moralisSecret: string = process.env.MORALIS_SECRET!;
 router.get('/api/info', async (req: Request, res: Response) => {
     // 1.1
     // @TODO -> pass token contract address and chain ID (BSC, ETH, Polygon)
+    console.log("Received token address: " + req.body.address);
     return res.status(200).send(await lookForToken(req.body.address));
 })
 
@@ -24,7 +25,7 @@ async function lookForToken(contractAddress: string) {
     const burnedTokens = (await getBurnedTokenAmount(contractAddress));
     const top10Holders = (await getTokenHolders(contractAddress, 10))?.map(tokenHolder => tokenHolder.address);
     const sourceCode = (await getContractSourceCode(contractAddress)).result;
-    return `${await burnedTokens}`
+    return `${await sourceCode}`
 }
 
 export { router as infoRouter };
