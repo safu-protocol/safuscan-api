@@ -10,7 +10,6 @@ export async function getTokenHolders(contractAddress: string, pageSize: number 
     return await fetch(url)
         .then(res => res.json())
         .then((json: any) => { 
-            // @ts-ignore
-            return json.data ? new CovalentResponse(json).data.items  : [] 
+            return json.data != null ? new CovalentResponse(json).data!.items : [] 
         });
 };

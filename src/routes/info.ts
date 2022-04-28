@@ -12,49 +12,60 @@ const router = express.Router();
 router.get('/api/info', async (req: Request, res: Response) => {
     if (req.query && req.query.address) {
         const tokenAddress = (req.query as any).address;
-        const foundToken = await Token.find({ token_address: tokenAddress })
 
-        return foundToken.length != 0 ?
-            res.status(200).send(foundToken[0]) :
+        if(req.query.refresh && req.query.refresh == 'true') {
+            return res.status(200).send(await lookForTokenAndSave(tokenAddress));
+        }
+
+        const foundToken = await Token.findOne({ token_address: tokenAddress })
+
+        return foundToken != null ?
+            res.status(200).send(foundToken) :
             res.status(200).send(await lookForTokenAndSave(tokenAddress));
     }
     return res.status(204).send();
 })
 
 async function lookForTokenAndSave(contractAddress: string): Promise<any> {
-    const totalSupply = (await getTokenTotalSupply(contractAddress)).result;
-    const burnedTokens = (await getBurnedTokenAmount(contractAddress));
+    const covalentData = (await getTokenHolders(contractAddress))
+
+    const tokenDecimals: any = parseInt(covalentData[0].contract_decimals as string)
+    const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
+    const burnedTokens = (await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals);
     const circulatingSupply = totalSupply - burnedTokens;
-    const tokenHoldersAmount = (await getTokenHolders(contractAddress)).length;
-    const honeyPotInfo = (await getHoneyPotInfo(contractAddress)).IsHoneypot;
+    const tokenHoldersAmount = covalentData.length;
+    const honeyPotInfo = (await getHoneyPotInfo(contractAddress));
     await delay(1000);
     const top10Holders: string[] = ((await getTokenHolders(contractAddress, 10)) as CovalentTokenHolder[]).map(tokenHolder => tokenHolder.address);
     await delay(1000);
     const sourceCode = (await getContractSourceCode(contractAddress)).result;
-    const creatorAddress = (await getContractTransactions(contractAddress)).result[0]?.from
+    const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
+
     
     const token = Token.build({ 
-        token_address: contractAddress,
-        total_supply: totalSupply, 
-        burned_tokens: burnedTokens, 
-        circulating_supply: circulatingSupply, 
-        number_of_holders: tokenHoldersAmount,
-        honeypot: honeyPotInfo,
-        top_holders: top10Holders,
-        token_deployer_address: creatorAddress
-    })
-    await token.save();
-
-    return new Token({
         token_address: contractAddress,
         total_supply: totalSupply, 
         burned_tokens:  burnedTokens, 
         circulating_supply: circulatingSupply, 
         number_of_holders: tokenHoldersAmount,
-        honeypot: honeyPotInfo,
+        proxy_contract: false,
+        honeypot: honeyPotInfo.IsHoneypot,
+        buy_gas_fee: honeyPotInfo.BuyGas,
+        sell_gas_fee: honeyPotInfo.SellGas,
+        buy_tax: honeyPotInfo.BuyTax,
+        sell_tax: honeyPotInfo.SellTax,
+        modify_buy_tax: false,
+        modify_sell_tax: false,
+        token_deployer_address: creatorAddress.from,
+        dev_wallets: [],
+        dex_liquidity_details: [],
         top_holders: top10Holders,
-        token_deployer_address: creatorAddress
+        total_score: 97,
+        conclusion: 'Trustworthy'
     });
+    await token.save();
+
+    return token;
 }
 
 export { router as infoRouter };

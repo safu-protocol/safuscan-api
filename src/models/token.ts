@@ -1,38 +1,38 @@
 import mongoose, { Document, Schema, Model, model, trusted } from 'mongoose'
 
 interface ISafuscanToken {
-    token_address: String 
-    total_supply: Number
-    burned_tokens: Number
-    circulating_supply: Number
-    number_of_holders: Number
-    proxy_contract?: Boolean
-    honeypot?: Boolean
-    buy_gas_fee?: Number
-    sell_gas_fee?: Number
-    buy_tax?: Number
-    sell_tax?: Number
-    modify_buy_tax?: Boolean
-    modify_sell_tax?: Boolean
-    max_buy_tx?: Number
-    max_sell_tx?: Number
-    disable_trading?: Boolean
-    disable_transfers?: Boolean
-    token_pause_function?: Boolean
-    ownership_renounced?: Boolean
-    token_deployer_address: String
-    token_current_owner?: String
-    deployer_number_of_deployed_contracts?: Number
-    deployer_number_of_suspicious_contracts?: Number
-    deployer_is_mixer?: Boolean
-    deployer_is_blacklist?: Boolean
-    dev_wallets?: String[]
-    token_mint_function_enabled?: Boolean
-    dex_liquidity_details?: String[]
+    token_address: string 
+    total_supply: number
+    burned_tokens: number
+    circulating_supply: number
+    number_of_holders: number
+    proxy_contract?: boolean
+    honeypot?: boolean
+    buy_gas_fee?: number
+    sell_gas_fee?: number
+    buy_tax?: number
+    sell_tax?: number
+    modify_buy_tax?: boolean
+    modify_sell_tax?: boolean
+    max_buy_tx?: number
+    max_sell_tx?: number
+    disable_trading?: boolean
+    disable_transfers?: boolean
+    token_pause_function?: boolean
+    ownership_renounced?: boolean
+    token_deployer_address: string
+    token_current_owner?: string
+    deployer_number_of_deployed_contracts?: number
+    deployer_number_of_suspicious_contracts?: number
+    deployer_is_mixer?: boolean
+    deployer_is_blacklist?: boolean
+    dev_wallets?: string[]
+    token_mint_function_enabled?: boolean
+    dex_liquidity_details?: string[]
     dex_liquidity_total_locked_pct?: number
-    top_holders: String[]
-    total_score?: Number
-    conclusion?: String
+    top_holders: string[]
+    total_score?: number
+    conclusion?: string
 }
 
 interface apiModelInterface extends Model<TokenDoc> {
@@ -40,38 +40,38 @@ interface apiModelInterface extends Model<TokenDoc> {
 }
 
 interface TokenDoc extends Document {
-    token_address: String 
-    total_supply: Number
-    burned_tokens: Number
-    circulating_supply: Number
-    number_of_holders: Number
-    proxy_contract?: Boolean
-    honeypot?: Boolean
-    buy_gas_fee?: Number
-    sell_gas_fee?: Number
-    buy_tax?: Number
-    sell_tax?: Number
-    modify_buy_tax?: Boolean
-    modify_sell_tax?: Boolean
-    max_buy_tx?: Number
-    max_sell_tx?: Number
-    disable_trading?: Boolean
-    disable_transfers?: Boolean
-    token_pause_function?: Boolean
-    ownership_renounced?: Boolean
-    token_deployer_address: String
-    token_current_owner?: String
-    deployer_number_of_deployed_contracts?: Number
-    deployer_number_of_suspicious_contracts?: Number
-    deployer_is_mixer?: Boolean
-    deployer_is_blacklist?: Boolean
-    dev_wallets?: String[]
-    token_mint_function_enabled?: Boolean
-    dex_liquidity_details?: String[]
+    token_address: string 
+    total_supply: number
+    burned_tokens: number
+    circulating_supply: number
+    number_of_holders: number
+    proxy_contract?: boolean
+    honeypot?: boolean
+    buy_gas_fee?: number
+    sell_gas_fee?: number
+    buy_tax?: number
+    sell_tax?: number
+    modify_buy_tax?: boolean
+    modify_sell_tax?: boolean
+    max_buy_tx?: number
+    max_sell_tx?: number
+    disable_trading?: boolean
+    disable_transfers?: boolean
+    token_pause_function?: boolean
+    ownership_renounced?: boolean
+    token_deployer_address: string
+    token_current_owner?: string
+    deployer_number_of_deployed_contracts?: number
+    deployer_number_of_suspicious_contracts?: number
+    deployer_is_mixer?: boolean
+    deployer_is_blacklist?: boolean
+    dev_wallets?: string[]
+    token_mint_function_enabled?: boolean
+    dex_liquidity_details?: string[]
     dex_liquidity_total_locked_pct?: number
-    top_holders: String[]
-    total_score?: Number
-    conclusion?: String
+    top_holders: string[]
+    total_score?: number
+    conclusion?: string
 }
 
 const tokenSchema = new Schema({
@@ -108,7 +108,7 @@ const tokenSchema = new Schema({
         required: false
     },
     sell_gas_fee: {
-        type: Boolean,
+        type: Number,
         required: false
     },
     buy_tax: {
