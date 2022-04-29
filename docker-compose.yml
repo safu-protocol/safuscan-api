@@ -1,0 +1,28 @@
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+
+  api:
+    image: "node:16"
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./:/home/node/app
+    command: "npm start"
+    expose:
+      - "3000"
+
+  proxy:
+    image: "nginx"
+    ports:
+       - 80:80
+       - 443:443
+    volumes:
+       - ./docker/proxy-certs/:/etc/ssl
+       - ./docker/proxy-config/nginx.conf:/etc/nginx/conf.d/default.conf
+    restart: always
