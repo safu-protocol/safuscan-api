@@ -17,6 +17,5 @@ export class ERC20ExtensionsStatus {
         this.votesComp = data.votesComp;
         this.wrapper = data.wrapper;
         this.flashMint = data.flashMint;
-        this.pausable = data.burnable
     };
 };
