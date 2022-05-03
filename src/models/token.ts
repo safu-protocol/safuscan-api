@@ -1,7 +1,10 @@
 import mongoose, { Document, Schema, Model, model, trusted } from 'mongoose'
 
 interface ISafuscanToken {
-    token_address: string 
+    token_address: string
+    token_name: string
+    token_logo?: string
+    token_decimals: number 
     total_supply: number
     burned_tokens: number
     circulating_supply: number
@@ -40,7 +43,10 @@ interface apiModelInterface extends Model<TokenDoc> {
 }
 
 interface TokenDoc extends Document {
-    token_address: string 
+    token_address: string
+    token_name: string
+    token_logo?: string
+    token_decimals: number  
     total_supply: number
     burned_tokens: number
     circulating_supply: number
@@ -77,6 +83,18 @@ interface TokenDoc extends Document {
 const tokenSchema = new Schema({
     token_address: {
         type: String,
+        required: true
+    },
+    token_name: {
+        type: String,
+        required: true
+    },
+    token_logo: {
+        type: String,
+        required: true
+    },
+    token_decimals: {
+        type: Number,
         required: true
     },
     total_supply: {
