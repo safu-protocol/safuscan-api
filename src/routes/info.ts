@@ -29,8 +29,10 @@ router.get('/api/info', async (req: Request, res: Response) => {
 
 async function lookForTokenAndSave(contractAddress: string): Promise<any> {
     const covalentData = (await getTokenHolders(contractAddress))
-
-    const tokenDecimals: any = parseInt(covalentData[0].contract_decimals as string)
+    
+    const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
+    const tokenLogo = covalentData[0].logo_url
+    const tokenDecimals = parseInt(covalentData[0].contract_decimals as string)
     const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
     const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals));
     const circulatingSupply = totalSupply - burnedTokens;
@@ -44,11 +46,14 @@ async function lookForTokenAndSave(contractAddress: string): Promise<any> {
     const getExtensions = checkForExtensions(sourceCode);
 
     console.log(getExtensions)
-    
+
     // const token = Token.build({ 
     //     token_address: contractAddress,
+    //     token_name: tokenName,
+    //     token_logo: tokenLogo,
+    //     token_decimals: tokenDecimals,
     //     total_supply: totalSupply, 
-    //     burned_tokens: burnedTokens, 
+    //     burned_tokens:  burnedTokens, 
     //     circulating_supply: circulatingSupply, 
     //     number_of_holders: tokenHoldersAmount,
     //     proxy_contract: false,
