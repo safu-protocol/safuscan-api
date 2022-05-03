@@ -43,6 +43,7 @@ async function lookForTokenAndSave(contractAddress: string): Promise<any> {
     await delay(1000);
     const sourceCode = (await getContractSourceCode(contractAddress)).result;
     const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
+    const tokenOwnable = sourceCode.match('is.*\bOwnable.*\{')
     const getExtensions = checkForExtensions(sourceCode);
 
     console.log(getExtensions)
