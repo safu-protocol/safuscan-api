@@ -1,7 +1,7 @@
 import fetch from "node-fetch"
-import { CovalentResponse } from "../models/covalent.response";
+import { CovalentResponse, CovalentTokenHolder } from "../models/covalent.response";
 
-export async function getTokenHolders(contractAddress: string, pageSize: number = 1000000000) {
+export async function getTokenHolders(contractAddress: string, pageSize: number = 1000000000): Promise<CovalentTokenHolder[]> {
     const url = "https://api.covalenthq.com/v1/56" +
     `/tokens/${contractAddress}/token_holders` +
     `/?key=${process.env.COVALENT_API_KEY}` +
