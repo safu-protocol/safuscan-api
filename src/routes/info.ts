@@ -4,6 +4,7 @@ import { getTokenHolders } from '../services/covalent.service';
 import { getHoneyPotInfo } from '../services/honeypot.service';
 import { Token } from '../models/token';
 import { CovalentTokenHolder } from '../models/covalent.response';
+import { checkForExtensions } from '../utils/contract.utils';
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -31,7 +32,7 @@ async function lookForTokenAndSave(contractAddress: string): Promise<any> {
 
     const tokenDecimals: any = parseInt(covalentData[0].contract_decimals as string)
     const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
-    const burnedTokens = (await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals);
+    const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals));
     const circulatingSupply = totalSupply - burnedTokens;
     const tokenHoldersAmount = covalentData.length;
     const honeyPotInfo = (await getHoneyPotInfo(contractAddress));
@@ -40,32 +41,34 @@ async function lookForTokenAndSave(contractAddress: string): Promise<any> {
     await delay(1000);
     const sourceCode = (await getContractSourceCode(contractAddress)).result;
     const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
+    const getExtensions = checkForExtensions(sourceCode);
 
+    console.log(getExtensions)
     
-    const token = Token.build({ 
-        token_address: contractAddress,
-        total_supply: totalSupply, 
-        burned_tokens:  burnedTokens, 
-        circulating_supply: circulatingSupply, 
-        number_of_holders: tokenHoldersAmount,
-        proxy_contract: false,
-        honeypot: honeyPotInfo.IsHoneypot,
-        buy_gas_fee: honeyPotInfo.BuyGas,
-        sell_gas_fee: honeyPotInfo.SellGas,
-        buy_tax: honeyPotInfo.BuyTax,
-        sell_tax: honeyPotInfo.SellTax,
-        modify_buy_tax: false,
-        modify_sell_tax: false,
-        token_deployer_address: creatorAddress.from,
-        dev_wallets: [],
-        dex_liquidity_details: [],
-        top_holders: top10Holders,
-        total_score: 97,
-        conclusion: 'Trustworthy'
-    });
-    await token.save();
+    // const token = Token.build({ 
+    //     token_address: contractAddress,
+    //     total_supply: totalSupply, 
+    //     burned_tokens: burnedTokens, 
+    //     circulating_supply: circulatingSupply, 
+    //     number_of_holders: tokenHoldersAmount,
+    //     proxy_contract: false,
+    //     honeypot: honeyPotInfo.IsHoneypot,
+    //     buy_gas_fee: honeyPotInfo.BuyGas,
+    //     sell_gas_fee: honeyPotInfo.SellGas,
+    //     buy_tax: honeyPotInfo.BuyTax,
+    //     sell_tax: honeyPotInfo.SellTax,
+    //     modify_buy_tax: false,
+    //     modify_sell_tax: false,
+    //     token_deployer_address: creatorAddress.from,
+    //     dev_wallets: [],
+    //     dex_liquidity_details: [],
+    //     top_holders: top10Holders,
+    //     total_score: 97,
+    //     conclusion: 'Trustworthy'
+    // });
+    // await token.save();
 
-    return token;
+    // return token;
 }
 
 export { router as infoRouter };

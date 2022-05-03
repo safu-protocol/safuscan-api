@@ -1,7 +1,31 @@
+import { ERC20ExtensionsStatus } from "../models/erc20.extensions.status";
 
-// TODO
+export function checkForExtensions(contractSource: string): ERC20ExtensionsStatus {
+    const extensionsUsed: {[extension: string]: boolean} = {};
 
-// export function getContractInfo() {
-// }
+    ERC20Extensions.forEach((extension: string) => {
+        extensionsUsed[extension] = contractSource.includes(extension)
+    });
 
-// const hasPauseFunction = (contract: string) => contract.includes('paused()');
+    return new ERC20ExtensionsStatus({
+        burnable: extensionsUsed['ERC20Burnable'],
+        capped: extensionsUsed['ERC20Capped'],
+        pausable: extensionsUsed['ERC20Pausable'],
+        snapshot: extensionsUsed['ERC20Snapshot'],
+        votes: extensionsUsed['ERC20Votes'],
+        votesComp: extensionsUsed['ERC20VotesComp'],
+        wrapper: extensionsUsed['ERC20Wrapper'],
+        flashMint: extensionsUsed['ERC20FlashMint'],
+    });
+}
+
+const ERC20Extensions: string[] = [
+    'ERC20Burnable',
+    'ERC20Capped',
+    'ERC20Pausable',
+    'ERC20Snapshot',
+    'ERC20Votes',
+    'ERC20VotesComp',
+    'ERC20Wrapper',
+    'ERC20FlashMint'
+];
