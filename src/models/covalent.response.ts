@@ -9,7 +9,7 @@ export class CovalentResponse {
 
 class ApiInfo {
     updated_at?: Date;
-    items: CovalentTokenHolder[] = [];
+    items: any[] = [];
     pagination: any;
     error: boolean = true;
     error_message?: string;
@@ -27,4 +27,35 @@ export class CovalentTokenHolder {
     balance?: string;
     total_supply?: string;
     block_height?: string;
+}
+
+export class LiquidityPoolDetails {
+    exchange?: string;
+    swap_count_24h?: number;
+    total_liquidity_quote?: string;
+    volume_24h_quote?: string;
+    fee_24h_quote?: string;
+    total_supply?: string;
+    quote_rate?: string
+    block_height?: number
+    token_0?: LiquidityPoolTokenDetails;
+    token_1?: LiquidityPoolTokenDetails;
+    chain_name?: string;
+    dex_name?: string;
+    volume_7d_quote?: string
+    annualized_fee?: string;
+}
+
+class LiquidityPoolTokenDetails {
+    contract_address?: string;
+    contract_name?: string;
+    volume_in_24h?: string;
+    volume_out_24h?: string;
+    quote_rate?: string;
+    reserve?: string;
+    logo_url?: string;
+    contract_ticker_symbol?: string;
+    contract_decimals?: number;
+    volume_in_7d?: string;
+    volume_out_7d?: string
 }

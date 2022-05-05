@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Model, model, trusted } from 'mongoose'
+import { LiquidityPool } from './liquidity.pool'
 
 interface ISafuscanToken {
     token_address: string
@@ -31,7 +32,7 @@ interface ISafuscanToken {
     deployer_is_blacklist?: boolean
     dev_wallets?: string[]
     token_mint_function_enabled?: boolean
-    dex_liquidity_details?: string[]
+    dex_liquidity_details?: LiquidityPool[]
     dex_liquidity_total_locked_pct?: number
     top_holders: string[]
     total_score?: number
@@ -73,7 +74,7 @@ interface TokenDoc extends Document {
     deployer_is_blacklist?: boolean
     dev_wallets?: string[]
     token_mint_function_enabled?: boolean
-    dex_liquidity_details?: string[]
+    dex_liquidity_details?: LiquidityPool[]
     dex_liquidity_total_locked_pct?: number
     top_holders: string[]
     total_score?: number
@@ -201,10 +202,20 @@ const tokenSchema = new Schema({
         type: Boolean,
         required: false
     },
-    dex_liquidity_details: {
-        type: Array,
-        required: false
-    },
+    dex_liquidity_details: [{
+        name: { 
+            type: String,
+            required: true,
+        },
+        pair: {
+            type: String,
+            required: true,
+        },
+        amount: {
+            type: Number,
+            required: true
+        }
+    }],
     dex_liquidity_total_locked_pct: {
         type: Number,
         required: false
