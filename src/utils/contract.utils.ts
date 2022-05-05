@@ -10,7 +10,7 @@ export function checkForExtensions(contractSource: string): ERC20ExtensionsStatu
     return new ERC20ExtensionsStatus({
         burnable: extensionsUsed['ERC20Burnable'],
         capped: extensionsUsed['ERC20Capped'],
-        pausable: extensionsUsed['ERC20Pausable'],
+        pausable: extensionsUsed['ERC20Pausable'] || isTokenPausable(contractSource),
         snapshot: extensionsUsed['ERC20Snapshot'],
         votes: extensionsUsed['ERC20Votes'],
         votesComp: extensionsUsed['ERC20VotesComp'],
@@ -18,6 +18,12 @@ export function checkForExtensions(contractSource: string): ERC20ExtensionsStatu
         flashMint: extensionsUsed['ERC20FlashMint'],
     });
 }
+
+export const isTokenOwnable = (contractSource: string) => contractSource.match('\s+is.*Ownable.*\{')
+
+export const isTokenMintable = (contractSource: string) => contractSource.match('\s+_mint(.*\)')
+
+export const isTokenPausable = (contractSource: string) => contractSource.match('\s+is.*Pausable.*\{')
 
 const ERC20Extensions: string[] = [
     'ERC20Burnable',

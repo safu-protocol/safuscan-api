@@ -1,10 +1,11 @@
 import express, { Request, Response } from 'express';
 import { getTokenTotalSupply, getBurnedTokenAmount, getContractSourceCode, getContractTransactions } from '../services/bsc-scan.service';
-import { getTokenHolders } from '../services/covalent.service';
+import { getTokenHolders, getDEXLiquidityPools } from '../services/covalent.service';
 import { getHoneyPotInfo } from '../services/honeypot.service';
 import { Token } from '../models/token';
 import { CovalentTokenHolder } from '../models/covalent.response';
-import { checkForExtensions } from '../utils/contract.utils';
+import { checkForExtensions, isTokenMintable, isTokenOwnable } from '../utils/contract.utils';
+const fs = require('fs')
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -27,26 +28,28 @@ router.get('/api/info', async (req: Request, res: Response) => {
     return res.status(204).send();
 })
 
-async function lookForTokenAndSave(contractAddress: string): Promise<any> {
-    const covalentData = (await getTokenHolders(contractAddress))
+async function lookForTokenAndSave(contractAddress: string) {
+    // const covalentData = (await getTokenHolders(contractAddress))
     
-    const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
-    const tokenLogo = covalentData[0].logo_url
-    const tokenDecimals = parseInt(covalentData[0].contract_decimals as string)
-    const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
-    const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals));
-    const circulatingSupply = totalSupply - burnedTokens;
-    const tokenHoldersAmount = covalentData.length;
-    const honeyPotInfo = (await getHoneyPotInfo(contractAddress));
-    await delay(1000);
-    const top10Holders: string[] = ((await getTokenHolders(contractAddress, 10)) as CovalentTokenHolder[]).map(tokenHolder => tokenHolder.address);
-    await delay(1000);
-    const sourceCode = (await getContractSourceCode(contractAddress)).result;
-    const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
-    const tokenOwnable = sourceCode.match('\s+is.*Ownable.*\{')
-    const getExtensions = checkForExtensions(sourceCode);
-
-    console.log(getExtensions)
+    // const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
+    // const tokenLogo = covalentData[0].logo_url
+    // const tokenDecimals = parseInt(covalentData[0].contract_decimals as string)
+    // const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
+    // const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals));
+    // const circulatingSupply = totalSupply - burnedTokens;
+    // const tokenHoldersAmount = covalentData.length;
+    // const honeyPotInfo = (await getHoneyPotInfo(contractAddress));
+    // await delay(1000);
+    // const top10Holders: string[] = ((await getTokenHolders(contractAddress, 10)) as CovalentTokenHolder[]).map(tokenHolder => tokenHolder.address);
+    // await delay(1000);
+    // const sourceCode = (await getContractSourceCode(contractAddress)).result[0].SourceCode;
+    // const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
+    const dexLiquidityDetails = (await getDEXLiquidityPools(contractAddress))
+    console.log(dexLiquidityDetails);
+    // const tokenOwnable = isTokenOwnable(sourceCode)
+    // const hasMintFunction = isTokenMintable(sourceCode)
+    // const getExtensions = checkForExtensions(sourceCode);
+    // const ownershipRenounced 
 
     // const token = Token.build({ 
     //     token_address: contractAddress,
@@ -75,6 +78,6 @@ async function lookForTokenAndSave(contractAddress: string): Promise<any> {
     // await token.save();
 
     // return token;
-}
+};
 
 export { router as infoRouter };
