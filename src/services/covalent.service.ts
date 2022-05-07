@@ -80,6 +80,8 @@ export async function getSushiSwapLiquidityPool(contractAddress: string): Promis
     `/?quote-currency=BNB&format=JSON&tickers=&contract-addresses=${contractAddress}` +
     `&key=${process.env.COVALENT_API_KEY}`
 
+    console.log(url);
+
     const result = await fetch(url)
         .then(res => res.json())
         .then((json: any) => { 

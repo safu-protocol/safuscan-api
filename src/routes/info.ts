@@ -5,7 +5,32 @@ import { getHoneyPotInfo } from '../services/honeypot.service';
 import { Token } from '../models/token';
 import { CovalentTokenHolder } from '../models/covalent.response';
 import { checkForExtensions, isTokenMintable, isTokenOwnable } from '../utils/contract.utils';
-const fs = require('fs')
+import { getSmartContractAttributes, isOwnerRenounced } from '../services/bitquery.service';
+
+export const burnAddressesList: string[] = [
+    '0x000000000000000000000000000000000000dead',
+    '0x0000000000000000000000000000000000000000',
+    '0x0000000000000000000000000000000000000001',
+    '0x0000000000000000000000000000000000000005',
+    '0x0000000000000000000000000000000000000003',
+    '0x0000000000000000000000000000000000000004',
+    '0x0000000000000000000000000000000000000002',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+    '0x1111111111111111111111111111111111111111',
+    '0xdead000000000000000042069420694206942069',
+    '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    '0x6666666666666666666666666666666666666666',
+    '0x3333333333333333333333333333333333333333',
+    '0x64b00b5ec6df675e94736bdcc006dbd9a0b8b00b',
+    '0x8888888888888888888888888888888888888888',
+    '0x0000000000000000000000000000000000000008',
+    '0x2222222222222222222222222222222222222222',
+    '0xffffffffffffffffffffffffffffffffffffffff',
+    '0x0000000000000000000000000000000000000007',
+    '0x0000000000000000000000000000000000000006',
+    '0x0000000000000000000000000000000000000009',
+    '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+];
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -44,11 +69,12 @@ async function lookForTokenAndSave(contractAddress: string) {
     // await delay(1000);
     // const sourceCode = (await getContractSourceCode(contractAddress)).result[0].SourceCode;
     // const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
-    const dexLiquidityDetails = (await getDEXLiquidityPools(contractAddress))
-    console.log(dexLiquidityDetails);
+    // const dexLiquidityDetails = (await getDEXLiquidityPools(contractAddress))
     // const tokenOwnable = isTokenOwnable(sourceCode)
     // const hasMintFunction = isTokenMintable(sourceCode)
     // const getExtensions = checkForExtensions(sourceCode);
+    const test = (await isOwnerRenounced(contractAddress));
+    console.log(test);
     // const ownershipRenounced 
 
     // const token = Token.build({ 
