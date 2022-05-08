@@ -19,11 +19,13 @@ export function checkForExtensions(contractSource: string): ERC20ExtensionsStatu
     });
 }
 
-export const isTokenOwnable = (contractSource: string) => contractSource.match('\s+is.*Ownable.*\{')
+export const isTokenOwnable = (contractSource: string) => !!contractSource.match('\s+is.*Ownable.*\{')
 
-export const isTokenMintable = (contractSource: string) => contractSource.match('\s+_mint(.*\)')
+export const isTokenMintable = (contractSource: string) => !!contractSource.match('\s+_mint(.*\)')
 
-export const isTokenPausable = (contractSource: string) => contractSource.match('\s+is.*Pausable.*\{')
+export const isTokenPausable = (contractSource: string) => !!contractSource.match('\s+is.*Pausable.*\{')
+
+export const isTokenProxyable = (contractSource: string) => !!contractSource.match('\s+is.*Proxy.*\{')
 
 const ERC20Extensions: string[] = [
     'ERC20Burnable',

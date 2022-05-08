@@ -23,6 +23,7 @@ interface ISafuscanToken {
     disable_trading?: boolean
     disable_transfers?: boolean
     token_pause_function?: boolean
+    token_ownable?: boolean
     ownership_renounced?: boolean
     token_deployer_address: string
     token_current_owner?: string
@@ -65,6 +66,7 @@ interface TokenDoc extends Document {
     disable_trading?: boolean
     disable_transfers?: boolean
     token_pause_function?: boolean
+    token_ownable?: boolean
     ownership_renounced?: boolean
     token_deployer_address: string
     token_current_owner?: string
@@ -163,6 +165,10 @@ const tokenSchema = new Schema({
         required: false
     },
     token_pause_function: {
+        type: Boolean,
+        required: false
+    },
+    token_ownable: {
         type: Boolean,
         required: false
     },

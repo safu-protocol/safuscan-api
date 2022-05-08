@@ -1,17 +1,25 @@
 export class BitqueryResponse {
-    ethereum: SmartChainData;
+    data: SmartChain;
 
     constructor(data: any) {
-        this.ethereum = data.ethereum;
+        this.data = data.data;
     }
 }
 
+class SmartChain {
+    ethereum?: SmartChainData;
+}
+
 class SmartChainData {
-    address?: AddressData[];
+    address?: ContractAddressData[];
+}
+
+class ContractAddressData {
+    smartContract?: SmartContractData;
 }
 
 class AddressData {
-    smartContract?: SmartContractData;
+    address?: string;
 }
 
 export class SmartContractData {
@@ -21,6 +29,6 @@ export class SmartContractData {
 export class SmartContractAttributes {
     name?: string;
     type?: string;
-    address?: string;
+    address?: AddressData;
     value?: string;
 }

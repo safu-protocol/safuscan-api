@@ -29,7 +29,7 @@ export class CovalentTokenHolder {
     block_height?: string;
 }
 
-export class LiquidityPoolDetails {
+class LiquidityPoolDetails {
     exchange?: string;
     swap_count_24h?: number;
     total_liquidity_quote?: string;
