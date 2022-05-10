@@ -59,9 +59,9 @@ async function lookForTokenAndSave(contractAddress: string) {
 
     const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
     const tokenLogo = covalentData[0].logo_url
-    const tokenDecimals = parseInt(covalentData[0].contract_decimals as string)
+    const tokenDecimals = parseInt(covalentData[0].contract_decimals as string) || 0
     const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
-    const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals));
+    const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals)) || 0;
     const circulatingSupply = totalSupply - burnedTokens;
     const tokenHoldersAmount = covalentData.length;
     const honeyPotInfo = (await getHoneyPotInfo(contractAddress));

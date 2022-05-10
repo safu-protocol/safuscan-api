@@ -34,7 +34,7 @@ export async function getDEXLiquidityPools(contractAddress: string): Promise<Liq
     const pancakeSwap = await getLiquidityPool(contractAddress, 'pancakeswap_v2');
     const sushiswap = await getLiquidityPool(contractAddress, 'sushiswap');
 
-    const result = [uniswap, pancakeSwap, sushiswap].filter((exchangeData: LiquidityPool|null) => exchangeData != null);
+    const result = [uniswap, pancakeSwap, sushiswap].filter((exchangeData: LiquidityPool|null) => exchangeData?.amount != null);
 
     let totalSupply = 0;
     let totalLocked = 0;
@@ -67,7 +67,7 @@ async function getLiquidityPool(contractAddress: string, exchange: string): Prom
     return new LiquidityPool({
         name: exchange,
         pair: result.token_1.contract_ticker_symbol + '/' + result.token_0.contract_ticker_symbol,
-        amount: parseInt(result.total_supply.slice(0, -result.token_1.contract_decimals)),
-        locked: parseInt(result.token_1.reserve.slice(0, -result.token_1.contract_decimals))
+        amount: parseInt(result.total_supply.slice(0, -result.token_1.contract_decimals) || 0),
+        locked: parseInt(result.token_1.reserve.slice(0, -result.token_1.contract_decimals) || 0)
     })
 }
