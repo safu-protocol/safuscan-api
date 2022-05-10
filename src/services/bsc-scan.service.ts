@@ -1,30 +1,6 @@
 import fetch from 'node-fetch';
 import { BscScanData } from '../models/bsc-scan.response'
-
-const burnAddressesList: string[] = [
-    '0x000000000000000000000000000000000000dead',
-    '0x0000000000000000000000000000000000000000',
-    '0x0000000000000000000000000000000000000001',
-    '0x0000000000000000000000000000000000000005',
-    '0x0000000000000000000000000000000000000003',
-    '0x0000000000000000000000000000000000000004',
-    '0x0000000000000000000000000000000000000002',
-    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-    '0x1111111111111111111111111111111111111111',
-    '0xdead000000000000000042069420694206942069',
-    '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-    '0x6666666666666666666666666666666666666666',
-    '0x3333333333333333333333333333333333333333',
-    '0x64b00b5ec6df675e94736bdcc006dbd9a0b8b00b',
-    '0x8888888888888888888888888888888888888888',
-    '0x0000000000000000000000000000000000000008',
-    '0x2222222222222222222222222222222222222222',
-    '0xffffffffffffffffffffffffffffffffffffffff',
-    '0x0000000000000000000000000000000000000007',
-    '0x0000000000000000000000000000000000000006',
-    '0x0000000000000000000000000000000000000009',
-    '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-];
+import { burnAddressesList } from '../routes/info';
 
 export async function getTokenTotalSupply(contractAddress: string): Promise<BscScanData> {
     const url = "https://api.bscscan.com/api" +
@@ -63,7 +39,7 @@ export async function getAccountBalanceOfToken(contractAddress: string, accountA
         .then(json => new BscScanData(json));
 }
 
-export async function getBurnedTokenAmount(contractAddress: string) {
+export async function getBurnedTokenAmount(contractAddress: string): Promise<string> {
 
     const accountBalance = async (burnAddress: string) => (await getAccountBalanceOfToken(contractAddress, burnAddress)).result
 
@@ -77,7 +53,7 @@ export async function getBurnedTokenAmount(contractAddress: string) {
     )[0];
 }
 
-export async function getContractSourceCode(contractAddress: string) {
+export async function getContractSourceCode(contractAddress: string): Promise<BscScanData> {
     const url = "https://api.bscscan.com/api" +
         "?module=contract" +
         "&action=getsourcecode" +
@@ -89,7 +65,7 @@ export async function getContractSourceCode(contractAddress: string) {
         .then(json => new BscScanData(json));
 }
 
-export async function getContractTransactions(contractAddress: string) {
+export async function getContractTransactions(contractAddress: string): Promise<BscScanData> {
     const url = "https://api.bscscan.com/api" +
         "?module=account" +
         "&action=txlist" +

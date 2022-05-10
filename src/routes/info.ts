@@ -1,9 +1,36 @@
 import express, { Request, Response } from 'express';
 import { getTokenTotalSupply, getBurnedTokenAmount, getContractSourceCode, getContractTransactions } from '../services/bsc-scan.service';
-import { getTokenHolders } from '../services/covalent.service';
+import { getTokenHolders, getDEXLiquidityPools } from '../services/covalent.service';
 import { getHoneyPotInfo } from '../services/honeypot.service';
 import { Token } from '../models/token';
 import { CovalentTokenHolder } from '../models/covalent.response';
+import { checkForExtensions, isTokenMintable, isTokenOwnable, isTokenPausable, isTokenProxyable } from '../utils/contract.utils';
+import { getOwnerAddress, getSmartContractAttributes, isOwnerRenounced } from '../services/bitquery.service';
+
+export const burnAddressesList: string[] = [
+    '0x000000000000000000000000000000000000dead',
+    '0x0000000000000000000000000000000000000000',
+    '0x0000000000000000000000000000000000000001',
+    '0x0000000000000000000000000000000000000005',
+    '0x0000000000000000000000000000000000000003',
+    '0x0000000000000000000000000000000000000004',
+    '0x0000000000000000000000000000000000000002',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+    '0x1111111111111111111111111111111111111111',
+    '0xdead000000000000000042069420694206942069',
+    '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    '0x6666666666666666666666666666666666666666',
+    '0x3333333333333333333333333333333333333333',
+    '0x64b00b5ec6df675e94736bdcc006dbd9a0b8b00b',
+    '0x8888888888888888888888888888888888888888',
+    '0x0000000000000000000000000000000000000008',
+    '0x2222222222222222222222222222222222222222',
+    '0xffffffffffffffffffffffffffffffffffffffff',
+    '0x0000000000000000000000000000000000000007',
+    '0x0000000000000000000000000000000000000006',
+    '0x0000000000000000000000000000000000000009',
+    '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+];
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -26,24 +53,33 @@ router.get('/api/info', async (req: Request, res: Response) => {
     return res.status(204).send();
 })
 
-async function lookForTokenAndSave(contractAddress: string): Promise<any> {
+async function lookForTokenAndSave(contractAddress: string) {
     const covalentData = (await getTokenHolders(contractAddress))
+    const dexLiquidityData = (await getDEXLiquidityPools(contractAddress))
     
     const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
     const tokenLogo = covalentData[0].logo_url
     const tokenDecimals = parseInt(covalentData[0].contract_decimals as string)
     const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
-    const burnedTokens = (await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals);
+    const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals));
     const circulatingSupply = totalSupply - burnedTokens;
     const tokenHoldersAmount = covalentData.length;
     const honeyPotInfo = (await getHoneyPotInfo(contractAddress));
     await delay(1000);
     const top10Holders: string[] = ((await getTokenHolders(contractAddress, 10)) as CovalentTokenHolder[]).map(tokenHolder => tokenHolder.address);
     await delay(1000);
-    const sourceCode = (await getContractSourceCode(contractAddress)).result;
+    const sourceCode = (await getContractSourceCode(contractAddress)).result[0].SourceCode;
+    const isProxyContract = isTokenProxyable(sourceCode)
     const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
+    const dexLiquidityDetails = dexLiquidityData.liquidityPools;
+    const dexLockedLiquidity = dexLiquidityData.lockedPct;
+    const tokenOwnable = isTokenOwnable(sourceCode);
+    const tokenPausable = isTokenPausable(sourceCode);
+    const hasMintFunction = isTokenMintable(sourceCode);
+    const getExtensions = checkForExtensions(sourceCode);
+    const ownershipRenounced = await isOwnerRenounced(contractAddress);
+    const currentOwner = await getOwnerAddress(contractAddress);
 
-    
     const token = Token.build({ 
         token_address: contractAddress,
         token_name: tokenName,
@@ -53,7 +89,7 @@ async function lookForTokenAndSave(contractAddress: string): Promise<any> {
         burned_tokens:  burnedTokens, 
         circulating_supply: circulatingSupply, 
         number_of_holders: tokenHoldersAmount,
-        proxy_contract: false,
+        proxy_contract: isProxyContract,
         honeypot: honeyPotInfo.IsHoneypot,
         buy_gas_fee: honeyPotInfo.BuyGas,
         sell_gas_fee: honeyPotInfo.SellGas,
@@ -61,9 +97,15 @@ async function lookForTokenAndSave(contractAddress: string): Promise<any> {
         sell_tax: honeyPotInfo.SellTax,
         modify_buy_tax: false,
         modify_sell_tax: false,
+        token_pause_function: tokenPausable,
+        token_ownable: tokenOwnable,
+        ownership_renounced: ownershipRenounced,
         token_deployer_address: creatorAddress.from,
+        token_current_owner: currentOwner,
         dev_wallets: [],
-        dex_liquidity_details: [],
+        token_mint_function_enabled: hasMintFunction,
+        dex_liquidity_details: dexLiquidityDetails,
+        dex_liquidity_total_locked_pct: dexLockedLiquidity,
         top_holders: top10Holders,
         total_score: 97,
         conclusion: 'Trustworthy'
@@ -71,6 +113,6 @@ async function lookForTokenAndSave(contractAddress: string): Promise<any> {
     await token.save();
 
     return token;
-}
+};
 
 export { router as infoRouter };
