@@ -1,10 +1,11 @@
 # SAFUSCAN API
 
 - copy .env-example to .env
-- create empty mongoDB database -> it can be local one or in cloud
-- npm install
-- npm start
-- Sample GET implemented: http://localhost:3000/api/info
-- Sample PUT/POST implemented
-<img width="432" alt="Screenshot 2022-02-12 at 21 58 43" src="https://user-images.githubusercontent.com/84081868/153729812-c91d0a80-0c83-4327-a1d7-e8b12f62bed5.png">
+- Generate self-signed certificate for proxy with the commands
+`openssl req -x509 -out ./docker-proxy-certs/safu.crt -keyout ./docker/proxy-certs/safu.key \
+  -newkey rsa:2048 -nodes -sha256 \
+  -subj '/CN=localhost' -extensions EXT -config <( \
+   printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")`
+- run docker-compose up -d
+- Token query is done at : https://localhost:443/api/info with query parameter `address=TOKEN_ADDRESS` and `refresh=BOOLEAN` to renew token info
 

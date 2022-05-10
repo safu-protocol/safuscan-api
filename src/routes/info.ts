@@ -1,31 +1,118 @@
 import express, { Request, Response } from 'express';
-import { getAccountBalanceOfToken, getCirculatingSupply, getTokenTotalSupply, getBurnedTokenAmount, getContractSourceCode } from '../services/bsc-scan.service';
-import { getTokenHolders } from '../services/covalent.service';
+import { getTokenTotalSupply, getBurnedTokenAmount, getContractSourceCode, getContractTransactions } from '../services/bsc-scan.service';
+import { getTokenHolders, getDEXLiquidityPools } from '../services/covalent.service';
 import { getHoneyPotInfo } from '../services/honeypot.service';
+import { Token } from '../models/token';
+import { CovalentTokenHolder } from '../models/covalent.response';
+import { checkForExtensions, isTokenMintable, isTokenOwnable, isTokenPausable, isTokenProxyable } from '../utils/contract.utils';
+import { getOwnerAddress, getSmartContractAttributes, isOwnerRenounced } from '../services/bitquery.service';
+
+export const burnAddressesList: string[] = [
+    '0x000000000000000000000000000000000000dead',
+    '0x0000000000000000000000000000000000000000',
+    '0x0000000000000000000000000000000000000001',
+    '0x0000000000000000000000000000000000000005',
+    '0x0000000000000000000000000000000000000003',
+    '0x0000000000000000000000000000000000000004',
+    '0x0000000000000000000000000000000000000002',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+    '0x1111111111111111111111111111111111111111',
+    '0xdead000000000000000042069420694206942069',
+    '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    '0x6666666666666666666666666666666666666666',
+    '0x3333333333333333333333333333333333333333',
+    '0x64b00b5ec6df675e94736bdcc006dbd9a0b8b00b',
+    '0x8888888888888888888888888888888888888888',
+    '0x0000000000000000000000000000000000000008',
+    '0x2222222222222222222222222222222222222222',
+    '0xffffffffffffffffffffffffffffffffffffffff',
+    '0x0000000000000000000000000000000000000007',
+    '0x0000000000000000000000000000000000000006',
+    '0x0000000000000000000000000000000000000009',
+    '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+];
+
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 const router = express.Router();
 
-const moralisServerUrl: string = process.env.MORALIS_SERVER_URL!;
-const moralisAppId: string = process.env.MORALIS_APP_ID!;
-const moralisSecret: string = process.env.MORALIS_SECRET!;
-
 router.get('/api/info', async (req: Request, res: Response) => {
-    // 1.1
-    // @TODO -> pass token contract address and chain ID (BSC, ETH, Polygon)
-    console.log("Received token address: " + req.body.address);
-    return res.status(200).send(await lookForToken(req.body.address));
+    if (req.query && req.query.address) {
+        const tokenAddress = (req.query as any).address;
+
+        if(req.query.refresh && req.query.refresh == 'true') {
+            return res.status(200).send(await lookForTokenAndSave(tokenAddress));
+        }
+
+        const foundToken = await Token.findOne({ token_address: tokenAddress })
+
+        return foundToken != null ?
+            res.status(200).send(foundToken) :
+            res.status(200).send(await lookForTokenAndSave(tokenAddress));
+    }
+    return res.status(204).send();
 })
 
-async function lookForToken(contractAddress: string) {
-    const totalSupply = (await getTokenTotalSupply(contractAddress)).result;
-    const circulatingSupply = (await getCirculatingSupply(contractAddress)).result;
-    const tokenHoldersAmount = (await getTokenHolders(contractAddress))?.length;
-    const honeyPotInfo = (await getHoneyPotInfo(contractAddress)).IsHoneypot;
-    await new Promise(res => setTimeout(res, 1000));
-    const burnedTokens = (await getBurnedTokenAmount(contractAddress));
-    const top10Holders = (await getTokenHolders(contractAddress, 10))?.map(tokenHolder => tokenHolder.address);
-    const sourceCode = (await getContractSourceCode(contractAddress)).result;
-    return `${await sourceCode}`
-}
+async function lookForTokenAndSave(contractAddress: string) {
+    const covalentData = (await getTokenHolders(contractAddress))
+    const dexLiquidityData = (await getDEXLiquidityPools(contractAddress))
+    
+    const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
+    const tokenLogo = covalentData[0].logo_url
+    const tokenDecimals = parseInt(covalentData[0].contract_decimals as string)
+    const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
+    const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals));
+    const circulatingSupply = totalSupply - burnedTokens;
+    const tokenHoldersAmount = covalentData.length;
+    const honeyPotInfo = (await getHoneyPotInfo(contractAddress));
+    await delay(1000);
+    const top10Holders: string[] = ((await getTokenHolders(contractAddress, 10)) as CovalentTokenHolder[]).map(tokenHolder => tokenHolder.address);
+    await delay(1000);
+    const sourceCode = (await getContractSourceCode(contractAddress)).result[0].SourceCode;
+    const isProxyContract = isTokenProxyable(sourceCode)
+    const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
+    const dexLiquidityDetails = dexLiquidityData.liquidityPools;
+    const dexLockedLiquidity = dexLiquidityData.lockedPct;
+    const tokenOwnable = isTokenOwnable(sourceCode);
+    const tokenPausable = isTokenPausable(sourceCode);
+    const hasMintFunction = isTokenMintable(sourceCode);
+    const getExtensions = checkForExtensions(sourceCode);
+    const ownershipRenounced = await isOwnerRenounced(contractAddress);
+    const currentOwner = await getOwnerAddress(contractAddress);
+
+    const token = Token.build({ 
+        token_address: contractAddress,
+        token_name: tokenName,
+        token_logo: tokenLogo,
+        token_decimals: tokenDecimals,
+        total_supply: totalSupply, 
+        burned_tokens:  burnedTokens, 
+        circulating_supply: circulatingSupply, 
+        number_of_holders: tokenHoldersAmount,
+        proxy_contract: isProxyContract,
+        honeypot: honeyPotInfo.IsHoneypot,
+        buy_gas_fee: honeyPotInfo.BuyGas,
+        sell_gas_fee: honeyPotInfo.SellGas,
+        buy_tax: honeyPotInfo.BuyTax,
+        sell_tax: honeyPotInfo.SellTax,
+        modify_buy_tax: false,
+        modify_sell_tax: false,
+        token_pause_function: tokenPausable,
+        token_ownable: tokenOwnable,
+        ownership_renounced: ownershipRenounced,
+        token_deployer_address: creatorAddress.from,
+        token_current_owner: currentOwner,
+        dev_wallets: [],
+        token_mint_function_enabled: hasMintFunction,
+        dex_liquidity_details: dexLiquidityDetails,
+        dex_liquidity_total_locked_pct: dexLockedLiquidity,
+        top_holders: top10Holders,
+        total_score: 97,
+        conclusion: 'Trustworthy'
+    });
+    await token.save();
+
+    return token;
+};
 
 export { router as infoRouter };
