@@ -5,7 +5,7 @@ interface ISafuscanToken {
     token_address: string
     token_name: string
     token_logo?: string
-    token_decimals: number 
+    token_decimals: number
     total_supply: number
     burned_tokens: number
     circulating_supply: number
@@ -48,7 +48,7 @@ interface TokenDoc extends Document {
     token_address: string
     token_name: string
     token_logo?: string
-    token_decimals: number  
+    token_decimals: number
     total_supply: number
     burned_tokens: number
     circulating_supply: number
@@ -209,7 +209,7 @@ const tokenSchema = new Schema({
         required: false
     },
     dex_liquidity_details: [{
-        name: { 
+        name: {
             type: String,
             required: true,
         },

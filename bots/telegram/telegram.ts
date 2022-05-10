@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose, { ConnectOptions } from 'mongoose';
 import { json } from 'body-parser';
 import dotenv from 'dotenv';
+import { Token } from '../../src/models/token';
+import { infoLookForTokenAndSave } from '../../src/routes/info';
 
 // Telegram BOT libraries
 import { Context, Telegraf, Markup } from 'telegraf';
@@ -65,15 +67,56 @@ bot.on('text', (ctx) => {
         ctx.reply('SAFUSCAN is a code analysis tool and rug detector for token smart contracts!');
     }
 
+    if (ctx.message.text == "👥 Network") {
+        ctx.reply('Currently active network is BSC - Binance Smart Chain.');
+    }
+
+    if (ctx.message.text == "⭐️ Scan Token") {
+        ctx.reply('Please enter the token contract address to scan! \nIt should start with 0x!');
+    }
+
     else {
-        ctx.reply(
-            "Token contract: " + ctx.message.text
-        );
+        // Make sure we start with 0x
+        if (ctx.message.text.substring(0, 2) == "0x") {
+            ctx.reply(
+                "Scanning Token contract: " + ctx.message.text
+            );
+
+            scanForToken(ctx.message.text, ctx);
+        }
     }
 
 });
 
 bot.launch();
+
+async function scanForToken(token_address: string, ctx: any) {
+    const foundToken = await Token.findOne({ token_address: token_address });
+    console.log(foundToken);
+    if (foundToken != null) {
+        ctx.replyWithHTML(
+            "<b>Token Name:</b> " + foundToken.token_name + "\n" +
+            "<b>Token Decimals:</b> " + foundToken.token_decimals + "\n" +
+            "<b>Total Supply:</b> " + foundToken.total_supply + "\n" +
+            "<b>Burned Tokens:</b> " + foundToken.burned_tokens + "\n" +
+            "<b>Circulating Supply:</b> " + foundToken.circulating_supply + "\n" +
+            "<b>Number of Holders:</b> " + foundToken.number_of_holders + "\n" +
+            "<b>Proxy Contract:</b> " + foundToken.proxy_contract + "\n" +
+            "<b>Honeypot:</b> " + foundToken.honeypot + "\n" +
+            "<b>Buy Gas Fee:</b> " + foundToken.buy_gas_fee + "\n" +
+            "<b>Sell Gas Fee:</b> " + foundToken.sell_gas_fee + "\n" +
+            "<b>Buy Tax:</b> " + foundToken.buy_tax + "%" + "\n" +
+            "<b>Sell Tax:</b> " + foundToken.sell_tax + "%" + "\n" +
+            "<b>Token Pause Function:</b> " + foundToken.token_pause_function + "\n" +
+            "<b>Token Mint Function:</b> " + foundToken.token_mint_function_enabled + "\n" +
+            "<b>Ownership Renounced:</b> " + foundToken.ownership_renounced + "\n" +
+            "<b>Token Deployer Address:</b> " + foundToken.token_deployer_address + "\n" +
+            "<b>Token Current Owner:</b> " + foundToken.token_current_owner + "\n" +
+            "<b>Total Score:</b> " + foundToken.total_score + "\n" +
+            "<b>Conclusion:</b> " + foundToken.conclusion
+        );
+    }
+}
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
