@@ -40,7 +40,7 @@ router.get('/api/info', async (req: Request, res: Response) => {
     if (req.query && req.query.address) {
         const tokenAddress = (req.query as any).address;
 
-        if(req.query.refresh && req.query.refresh == 'true') {
+        if (req.query.refresh && req.query.refresh == 'true') {
             return res.status(200).send(await lookForTokenAndSave(tokenAddress));
         }
 
@@ -56,7 +56,7 @@ router.get('/api/info', async (req: Request, res: Response) => {
 async function lookForTokenAndSave(contractAddress: string) {
     const covalentData = (await getTokenHolders(contractAddress))
     const dexLiquidityData = (await getDEXLiquidityPools(contractAddress))
-    
+
     const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
     const tokenLogo = covalentData[0].logo_url
     const tokenDecimals = parseInt(covalentData[0].contract_decimals as string)
@@ -80,14 +80,14 @@ async function lookForTokenAndSave(contractAddress: string) {
     const ownershipRenounced = await isOwnerRenounced(contractAddress);
     const currentOwner = await getOwnerAddress(contractAddress);
 
-    const token = Token.build({ 
+    const token = Token.build({
         token_address: contractAddress,
         token_name: tokenName,
         token_logo: tokenLogo,
         token_decimals: tokenDecimals,
-        total_supply: totalSupply, 
-        burned_tokens:  burnedTokens, 
-        circulating_supply: circulatingSupply, 
+        total_supply: totalSupply,
+        burned_tokens: burnedTokens,
+        circulating_supply: circulatingSupply,
         number_of_holders: tokenHoldersAmount,
         proxy_contract: isProxyContract,
         honeypot: honeyPotInfo.IsHoneypot,
@@ -115,4 +115,7 @@ async function lookForTokenAndSave(contractAddress: string) {
     return token;
 };
 
-export { router as infoRouter };
+export {
+    router as infoRouter,
+    lookForTokenAndSave as infoLookForTokenAndSave
+};
