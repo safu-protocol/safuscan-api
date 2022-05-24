@@ -60,7 +60,7 @@ async function lookForTokenAndSave(contractAddress: string) {
     const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
     const tokenLogo = covalentData[0].logo_url
     const tokenDecimals = parseInt(covalentData[0].contract_decimals as string) || 0
-    const totalSupply = (await getTokenTotalSupply(contractAddress)).result.slice(0, -tokenDecimals)
+    const totalSupply = (await getTokenTotalSupply(contractAddress))?.result.slice(0, -tokenDecimals)
     const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals)) || 0;
     const circulatingSupply = totalSupply - burnedTokens;
     const tokenHoldersAmount = covalentData.length;
@@ -68,9 +68,9 @@ async function lookForTokenAndSave(contractAddress: string) {
     await delay(1000);
     const top10Holders: string[] = ((await getTokenHolders(contractAddress, 10)) as CovalentTokenHolder[]).map(tokenHolder => tokenHolder.address);
     await delay(1000);
-    const sourceCode = (await getContractSourceCode(contractAddress)).result[0].SourceCode;
+    const sourceCode = (await getContractSourceCode(contractAddress))?.result[0].SourceCode;
     const isProxyContract = isTokenProxyable(sourceCode)
-    const creatorAddress = (await getContractTransactions(contractAddress)).result[0]
+    const creatorAddress = (await getContractTransactions(contractAddress))?.result[0]
     const dexLiquidityDetails = dexLiquidityData.liquidityPools;
     const dexLockedLiquidity = dexLiquidityData.lockedPct;
     const tokenOwnable = isTokenOwnable(sourceCode);
@@ -90,11 +90,11 @@ async function lookForTokenAndSave(contractAddress: string) {
         circulating_supply: circulatingSupply,
         number_of_holders: tokenHoldersAmount,
         proxy_contract: isProxyContract,
-        honeypot: honeyPotInfo.IsHoneypot,
-        buy_gas_fee: honeyPotInfo.BuyGas,
-        sell_gas_fee: honeyPotInfo.SellGas,
-        buy_tax: honeyPotInfo.BuyTax,
-        sell_tax: honeyPotInfo.SellTax,
+        honeypot: honeyPotInfo?.IsHoneypot,
+        buy_gas_fee: honeyPotInfo?.BuyGas,
+        sell_gas_fee: honeyPotInfo?.SellGas,
+        buy_tax: honeyPotInfo?.BuyTax,
+        sell_tax: honeyPotInfo?.SellTax,
         modify_buy_tax: false,
         modify_sell_tax: false,
         token_pause_function: tokenPausable,

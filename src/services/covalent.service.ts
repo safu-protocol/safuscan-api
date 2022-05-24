@@ -13,6 +13,10 @@ export async function getTokenHolders(contractAddress: string, pageSize: number 
         .then(res => res.json())
         .then((json: any) => {
             return json.data != null ? new CovalentResponse(json).data!.items : []
+        })
+        .catch(err => { 
+            console.error(err); 
+            return [];
         });
 };
 
@@ -26,6 +30,10 @@ export async function getTransactionHistory(contractAddress: string) {
         .then(res => res.json())
         .then((json: any) => {
             return json.data != null ? new CovalentResponse(json).data!.items : []
+        })
+        .catch(err => { 
+            console.error(err); 
+            return [];
         });
 }
 
@@ -60,6 +68,10 @@ async function getLiquidityPool(contractAddress: string, exchange: string): Prom
         .then(res => res.json())
         .then((json: any) => {
             return json.data != null ? new CovalentResponse(json).data!.items[0] : null
+        })
+        .catch(err => { 
+            console.error(err); 
+            return null;
         });
 
     if (result == null) return null;

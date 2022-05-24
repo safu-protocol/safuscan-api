@@ -16,7 +16,7 @@ export async function getOwnerAddress(contractAddress: string): Promise<string |
     } else return undefined
 }
 
-export async function getSmartContractAttributes(contractAddress: string): Promise<BitqueryResponse> {
+export async function getSmartContractAttributes(contractAddress: string): Promise<BitqueryResponse | null> {
     const query = `
     query {
         ethereum(network: bsc) {
@@ -51,4 +51,8 @@ export async function getSmartContractAttributes(contractAddress: string): Promi
     return await fetch(url, opts)
         .then(res => res.json())
         .then(json => new BitqueryResponse(json))
+        .catch(err => { 
+          console.error(err); 
+          return null;
+      });
 }
