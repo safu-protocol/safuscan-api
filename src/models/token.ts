@@ -38,13 +38,14 @@ interface ISafuscanToken {
     top_holders: string[]
     total_score?: number
     conclusion?: string
+    popularity?: number
 }
 
 interface apiModelInterface extends Model<TokenDoc> {
     build(attr: ISafuscanToken): TokenDoc
 }
 
-interface TokenDoc extends Document {
+export interface TokenDoc extends Document {
     token_address: string
     token_name: string
     token_logo?: string
@@ -81,6 +82,7 @@ interface TokenDoc extends Document {
     top_holders: string[]
     total_score?: number
     conclusion?: string
+    popularity?: number
 }
 
 const tokenSchema = new Schema({
@@ -237,6 +239,10 @@ const tokenSchema = new Schema({
     conclusion: {
         type: String,
         required: false
+    },
+    popularity: {
+        type: Number,
+        required: true
     }
 })
 
