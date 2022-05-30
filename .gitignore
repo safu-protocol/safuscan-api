@@ -2,3 +2,4 @@
 .env
 node_modules
 /docker/proxy-certs
+build

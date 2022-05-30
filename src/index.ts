@@ -25,3 +25,10 @@ mongoose.connect(
 app.listen(3000, () => {
     console.log('server is listening on port 3000!')
 });
+
+// Better tear down
+process.on('SIGINT', function () {
+    console.log("\nGracefully shutting down from SIGINT (Ctrl-C)");
+    // some other closing procedures go here
+    process.exit(0);
+});
