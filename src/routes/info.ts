@@ -6,6 +6,7 @@ import { Token, TokenDoc } from '../models/token';
 import { CovalentTokenHolder } from '../models/covalent.response';
 import { checkForExtensions, isTokenMintable, isTokenOwnable, isTokenPausable, isTokenProxyable } from '../utils/contract.utils';
 import { getOwnerAddress, getSmartContractAttributes, isOwnerRenounced } from '../services/bitquery.service';
+import { Stats } from '../models/stats';
 
 export const burnAddressesList: string[] = [
     '0x000000000000000000000000000000000000dead',
@@ -39,7 +40,7 @@ const router = express.Router();
 router.get('/api/info', async (req: Request, res: Response) => {
     if (req.query && req.query.address) {
         const tokenAddress = (req.query as any).address;
-        const foundToken = await Token.findOne({ token_address: tokenAddress })
+        const foundToken = await Token.findOne({ token_address: tokenAddress });
 
         if (req.query.refresh && req.query.refresh == 'true') {
             return foundToken ?
@@ -48,9 +49,10 @@ router.get('/api/info', async (req: Request, res: Response) => {
         }
 
         if (foundToken != null) {
-            const existingTokenPopularity = foundToken.popularity ? foundToken.popularity : 0
-            await foundToken.updateOne({ popularity: existingTokenPopularity + 1 })
-            return res.status(200).send(foundToken)
+            const existingTokenPopularity = foundToken.popularity ? foundToken.popularity : 0;
+            await foundToken.updateOne({ popularity: existingTokenPopularity + 1 });
+            updateStats();
+            return res.status(200).send(foundToken);
         } else {
             return res.status(200).send(await lookForTokenAndSave(tokenAddress));
         }
@@ -61,13 +63,13 @@ router.get('/api/info', async (req: Request, res: Response) => {
 })
 
 async function lookForTokenAndSave(contractAddress: string, existingToken?: TokenDoc) {
-    const covalentData = (await getTokenHolders(contractAddress))
-    const dexLiquidityData = (await getDEXLiquidityPools(contractAddress))
+    const covalentData = (await getTokenHolders(contractAddress));
+    const dexLiquidityData = (await getDEXLiquidityPools(contractAddress));
 
-    const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token'
-    const tokenLogo = covalentData[0].logo_url
-    const tokenDecimals = parseInt(covalentData[0].contract_decimals as string) || 0
-    const totalSupply = (await getTokenTotalSupply(contractAddress))?.result.slice(0, -tokenDecimals)
+    const tokenName = covalentData[0].contract_name ? covalentData[0].contract_name : 'Unknown token';
+    const tokenLogo = covalentData[0].logo_url;
+    const tokenDecimals = parseInt(covalentData[0].contract_decimals as string) || 0;
+    const totalSupply = (await getTokenTotalSupply(contractAddress))?.result.slice(0, -tokenDecimals);
     const burnedTokens = parseInt((await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals)) || 0;
     const circulatingSupply = totalSupply - burnedTokens;
     const tokenHoldersAmount = covalentData.length;
@@ -76,8 +78,8 @@ async function lookForTokenAndSave(contractAddress: string, existingToken?: Toke
     const top10Holders: string[] = ((await getTokenHolders(contractAddress, 10)) as CovalentTokenHolder[]).map(tokenHolder => tokenHolder.address);
     await delay(1000);
     const sourceCode = (await getContractSourceCode(contractAddress))?.result[0].SourceCode;
-    const isProxyContract = isTokenProxyable(sourceCode)
-    const creatorAddress = (await getContractTransactions(contractAddress))?.result[0]
+    const isProxyContract = isTokenProxyable(sourceCode);
+    const creatorAddress = (await getContractTransactions(contractAddress))?.result[0];
     const dexLiquidityDetails = dexLiquidityData.liquidityPools;
     const dexLockedLiquidity = dexLiquidityData.lockedPct;
     const tokenOwnable = isTokenOwnable(sourceCode);
@@ -86,7 +88,7 @@ async function lookForTokenAndSave(contractAddress: string, existingToken?: Toke
     const getExtensions = checkForExtensions(sourceCode);
     const ownershipRenounced = await isOwnerRenounced(contractAddress);
     const currentOwner = await getOwnerAddress(contractAddress);
-    const savedTokenPopularity = existingToken?.popularity ? existingToken.popularity : 0
+    const savedTokenPopularity = existingToken?.popularity ? existingToken.popularity : 0;
 
     const token = await Token.findOneAndUpdate(
         {
@@ -129,8 +131,21 @@ async function lookForTokenAndSave(contractAddress: string, existingToken?: Toke
         }
     );
 
+    updateStats();
+
     return token;
 };
+
+async function updateStats() {
+    const stats = await Stats.findOne();
+    if (stats != null) {
+        const apiCalls = stats.total_api_calls;
+        await stats.update({ total_api_calls: apiCalls + 1 });
+    } else {
+        const stats = await Stats.build({ total_api_calls: 1 });
+        await stats.save();
+    }
+}
 
 export {
     router as infoRouter,
