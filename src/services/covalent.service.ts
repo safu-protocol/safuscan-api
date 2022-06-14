@@ -37,10 +37,10 @@ export async function getTransactionHistory(contractAddress: string) {
         });
 }
 
-export async function getDEXLiquidityPools(contractAddress: string): Promise<LiquidityPoolsStats> {
-    const uniswap = await getLiquidityPool(contractAddress, 'uniswap_v2');
-    const pancakeSwap = await getLiquidityPool(contractAddress, 'pancakeswap_v2');
-    const sushiswap = await getLiquidityPool(contractAddress, 'sushiswap');
+export async function getDEXLiquidityPools(contractAddress: string, contractName: string): Promise<LiquidityPoolsStats> {
+    const uniswap = await getLiquidityPool(contractAddress, contractName, 'uniswap_v2');
+    const pancakeSwap = await getLiquidityPool(contractAddress, contractName, 'pancakeswap_v2');
+    const sushiswap = await getLiquidityPool(contractAddress, contractName, 'sushiswap');
 
     const result = [uniswap, pancakeSwap, sushiswap].filter((exchangeData: LiquidityPool|null) => exchangeData?.amount != null);
 
@@ -58,7 +58,7 @@ export async function getDEXLiquidityPools(contractAddress: string): Promise<Liq
     }) 
 }
 
-async function getLiquidityPool(contractAddress: string, exchange: string): Promise<LiquidityPool|null> {
+async function getLiquidityPool(contractAddress: string, contractName: string, exchange: string): Promise<LiquidityPool|null> {
     const url = "https://api.covalenthq.com/v1/56" +
         `/networks/${exchange}/assets` +
         `/?quote-currency=BNB&format=JSON&contract-addresses=${contractAddress}` +
@@ -74,10 +74,11 @@ async function getLiquidityPool(contractAddress: string, exchange: string): Prom
             return null;
         });
 
-    if (result == null) return null;
+    if (result == null || result.token_1.contract_name !== contractName) return null;
 
     return new LiquidityPool({
         name: exchange,
+        lp_address: result.exchange,
         pair: result.token_1.contract_ticker_symbol + '/' + result.token_0.contract_ticker_symbol,
         amount: parseInt(result.total_supply.slice(0, -result.token_1.contract_decimals) || 0),
         locked: parseInt(result.token_1.reserve.slice(0, -result.token_1.contract_decimals) || 0)
