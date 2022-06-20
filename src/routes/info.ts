@@ -1,12 +1,31 @@
-import express, { Request, Response } from 'express';
-import { getTokenTotalSupply, getBurnedTokenAmount, getContractSourceCode, getContractTransactions } from '../services/bsc-scan.service';
-import { getTokenHolders, getDEXLiquidityPools } from '../services/covalent.service';
-import { getHoneyPotInfo } from '../services/honeypot.service';
-import { Token, TokenDoc } from '../models/token';
-import { CovalentTokenHolder } from '../models/covalent.response';
-import { checkForExtensions, isTokenMintable, isTokenOwnable, isTokenPausable, isTokenProxyable } from '../utils/contract.utils';
-import { getOwnerAddress, getSmartContractAttributes, isOwnerRenounced } from '../services/bitquery.service';
-import { Stats } from '../models/stats';
+import express, { Request, Response } from "express";
+import {
+  getTokenTotalSupply,
+  getBurnedTokenAmount,
+  getContractSourceCode,
+  getContractTransactions,
+} from "../services/bsc-scan.service";
+import {
+  getTokenHolders,
+  getDEXLiquidityPools,
+} from "../services/covalent.service";
+import { getHoneyPotInfo } from "../services/honeypot.service";
+import { Token, TokenDoc } from "../models/token";
+import { CovalentTokenHolder } from "../models/covalent.response";
+import {
+  checkForExtensions,
+  isTokenMintable,
+  isTokenOwnable,
+  isTokenPausable,
+  isTokenProxyable,
+} from "../utils/contract.utils";
+import {
+  getOwnerAddress,
+  getSmartContractAttributes,
+  isOwnerRenounced,
+} from "../services/bitquery.service";
+import { Stats } from "../models/stats";
+import Web3 from "web3";
 
 export const burnAddressesList: string[] = [
     '0x000000000000000000000000000000000000dead',
@@ -37,10 +56,12 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 const router = express.Router();
 
-router.get('/api/info', async (req: Request, res: Response) => {
-    if (req.query && req.query.address) {
-        const tokenAddress = (req.query as any).address;
-        const foundToken = await Token.findOne({ token_address: tokenAddress });
+router.get("/api/info", async (req: Request, res: Response) => {
+  if (req.query && req.query.address) {
+    const tokenAddress = (req.query as any).address;
+    const foundToken = await Token.findOne({
+      token_address: Web3.utils.toChecksumAddress(tokenAddress),
+    });
 
         if (req.query.refresh && req.query.refresh == 'true') {
             return foundToken ?
