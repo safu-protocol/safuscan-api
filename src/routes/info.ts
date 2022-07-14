@@ -25,6 +25,7 @@ import {
   isOwnerRenounced,
 } from "../services/bitquery.service";
 import { Stats } from "../models/stats";
+import Web3 from "web3";
 
 export const burnAddressesList: string[] = [
   "0x000000000000000000000000000000000000dead",
@@ -58,7 +59,9 @@ const router = express.Router();
 router.get("/api/info", async (req: Request, res: Response) => {
   if (req.query && req.query.address) {
     const tokenAddress = (req.query as any).address;
-    const foundToken = await Token.findOne({ token_address: tokenAddress });
+    const foundToken = await Token.findOne({
+      token_address: Web3.utils.toChecksumAddress(tokenAddress),
+    });
 
     if (req.query.refresh && req.query.refresh == "true") {
       return foundToken
