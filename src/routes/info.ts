@@ -85,6 +85,7 @@ router.get("/api/info", async (req: Request, res: Response) => {
       }
 
     } catch (error) {
+      console.log(error);
       return res.status(200).send("Non valid Token Address!");
     }
   }
@@ -106,14 +107,13 @@ async function lookForTokenAndSave(
   );
 
   const tokenLogo = covalentData[0].logo_url;
-  const tokenDecimals =
-    parseInt(covalentData[0].contract_decimals as string) || 0;
+  const tokenDecimals = covalentData[0].contract_decimals || 18;
   const totalSupply = (
     await getTokenTotalSupply(contractAddress)
   )?.result.slice(0, -tokenDecimals);
   const burnedTokens =
     parseInt(
-      (await getBurnedTokenAmount(contractAddress)).slice(0, -tokenDecimals)
+      (await getBurnedTokenAmount(contractAddress))?.slice(0, -tokenDecimals)
     ) || 0;
   const circulatingSupply = totalSupply - burnedTokens;
   const tokenHoldersAmount = covalentData.length;
