@@ -2,7 +2,7 @@ export class HoneyPotData {
   BuyGas?: number;
   BuyTax?: number;
   Error?: boolean;
-  IsHoneypot?: false;
+  IsHoneypot?: boolean;
   MaxTxAmount?: number;
   MaxTxAmountBNB?: number;
   SellGas?: number;

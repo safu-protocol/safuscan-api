@@ -166,7 +166,7 @@ async function lookForTokenAndSave(
       dex_liquidity_total_locked_pct: dexLockedLiquidity,
       top_holders: top10Holders,
       total_score: 97,
-      conclusion: "Trustworthy",
+      conclusion: honeyPotInfo?.IsHoneypot != undefined && honeyPotInfo?.IsHoneypot == true ? "Scam": "Trustworthy",
       popularity: savedTokenPopularity + 1,
     },
     {
