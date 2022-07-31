@@ -1,0 +1,1 @@
+npx tsc && node build/bots/telegram/telegram.js

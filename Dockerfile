@@ -1,6 +1,11 @@
 # The image is built on top of one that has node preinstalled
 FROM node:16
 
+ARG TYPE=start-api
+
+# ARG is only available at build time but we need at run time
+ENV TYPE ${TYPE}
+
 # Create app directory
 WORKDIR /usr/src/app
 
@@ -14,7 +19,7 @@ RUN npm install
 EXPOSE 3000
 
 # Start the application
-ADD start-prod.sh /
-RUN chmod +x /start-prod.sh
+ADD ${TYPE}.sh /
+RUN chmod +x /${TYPE}.sh
 
-CMD ["/start-prod.sh"]
+CMD ["sh", "-c", "/${TYPE}.sh"]
