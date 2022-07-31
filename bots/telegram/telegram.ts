@@ -4,6 +4,7 @@ import { json } from 'body-parser';
 import dotenv from 'dotenv';
 import { Token } from '../../src/models/token';
 import { infoLookForTokenAndSave } from '../../src/routes/info';
+import Web3 from "web3";
 
 // Telegram BOT libraries
 import { Context, Telegraf, Markup } from 'telegraf';
@@ -91,9 +92,18 @@ bot.on('text', (ctx) => {
 bot.launch();
 
 async function scanForToken(token_address: string, ctx: any) {
-    const foundToken = await Token.findOne({ token_address: token_address });
-    console.log(foundToken);
-    if (foundToken != null) {
+    const tokenAddress = Web3.utils.toChecksumAddress((token_address));
+    if (tokenAddress) {
+        let foundToken = await Token.findOne({ token_address: token_address });
+
+        if (foundToken != null) {
+            // Already exists - Loading from DB
+        }
+        else {
+            // Make a new query
+            foundToken = await infoLookForTokenAndSave(tokenAddress);
+        }
+
         ctx.replyWithHTML(
             "<b>Token Name:</b> " + foundToken.token_name + "\n" +
             "<b>Token Decimals:</b> " + foundToken.token_decimals + "\n" +
@@ -112,8 +122,13 @@ async function scanForToken(token_address: string, ctx: any) {
             "<b>Ownership Renounced:</b> " + foundToken.ownership_renounced + "\n" +
             "<b>Token Deployer Address:</b> " + foundToken.token_deployer_address + "\n" +
             "<b>Token Current Owner:</b> " + foundToken.token_current_owner + "\n" +
-            "<b>Total Score:</b> " + foundToken.total_score + "\n" +
+            //"<b>Total Score:</b> " + foundToken.total_score + "\n" +
             "<b>Conclusion:</b> " + foundToken.conclusion
+        );
+    }
+    else {
+        ctx.replyWithHTML(
+            "<b>This is not a valid Token Contract Address!</b>"
         );
     }
 }
