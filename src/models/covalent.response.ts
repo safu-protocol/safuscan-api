@@ -16,7 +16,7 @@ class ApiInfo {
 }
 
 export class CovalentTokenHolder {
-  contract_decimals?: string;
+  contract_decimals?: number;
   contract_name?: string;
   contract_ticker_symbol?: string;
   contract_address?: string;
