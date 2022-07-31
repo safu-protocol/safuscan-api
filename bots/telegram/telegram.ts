@@ -92,7 +92,7 @@ async function scanForToken(token_address: string, ctx: any) {
     try {
         const tokenAddress = Web3.utils.toChecksumAddress((token_address));
         if (tokenAddress) {
-            let foundToken = await Token.findOne({ token_address: token_address });
+            let foundToken = await Token.findOne({ token_address: tokenAddress });
 
             if (foundToken != null) {
                 // Already exists - Loading from DB
