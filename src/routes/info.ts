@@ -58,9 +58,9 @@ const router = express.Router();
 
 router.get("/api/info", async (req: Request, res: Response) => {
   if (req.query && req.query.address) {
-    const tokenAddress = (req.query as any).address;
+    const tokenAddress = Web3.utils.toChecksumAddress((req.query as any).address);
     const foundToken = await Token.findOne({
-      token_address: Web3.utils.toChecksumAddress(tokenAddress),
+      token_address: tokenAddress,
     });
 
     if (req.query.refresh && req.query.refresh == "true") {
