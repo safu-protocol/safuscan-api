@@ -58,28 +58,34 @@ const router = express.Router();
 
 router.get("/api/info", async (req: Request, res: Response) => {
   if (req.query && req.query.address) {
-    const tokenAddress = Web3.utils.toChecksumAddress((req.query as any).address);
-    const foundToken = await Token.findOne({
-      token_address: tokenAddress,
-    });
 
-    if (req.query.refresh && req.query.refresh == "true") {
-      return foundToken
-        ? res
+    try {
+      const tokenAddress = Web3.utils.toChecksumAddress((req.query as any).address);
+      const foundToken = await Token.findOne({
+        token_address: tokenAddress,
+      });
+
+      if (req.query.refresh && req.query.refresh == "true") {
+        return foundToken
+          ? res
             .status(200)
             .send(await lookForTokenAndSave(tokenAddress, foundToken))
-        : res.status(200).send(await lookForTokenAndSave(tokenAddress));
-    }
+          : res.status(200).send(await lookForTokenAndSave(tokenAddress));
+      }
 
-    if (foundToken != null) {
-      const existingTokenPopularity = foundToken.popularity
-        ? foundToken.popularity
-        : 0;
-      await foundToken.updateOne({ popularity: existingTokenPopularity + 1 });
-      updateStats();
-      return res.status(200).send(foundToken);
-    } else {
-      return res.status(200).send(await lookForTokenAndSave(tokenAddress));
+      if (foundToken != null) {
+        const existingTokenPopularity = foundToken.popularity
+          ? foundToken.popularity
+          : 0;
+        await foundToken.updateOne({ popularity: existingTokenPopularity + 1 });
+        updateStats();
+        return res.status(200).send(foundToken);
+      } else {
+        return res.status(200).send(await lookForTokenAndSave(tokenAddress));
+      }
+
+    } catch (error) {
+      return res.status(200).send("Non valid Token Address!");
     }
   }
   return res.status(204).send();
@@ -166,7 +172,7 @@ async function lookForTokenAndSave(
       dex_liquidity_total_locked_pct: dexLockedLiquidity,
       top_holders: top10Holders,
       total_score: 97,
-      conclusion: honeyPotInfo?.IsHoneypot != undefined && honeyPotInfo?.IsHoneypot == true ? "Scam": "Trustworthy",
+      conclusion: honeyPotInfo?.IsHoneypot != undefined && honeyPotInfo?.IsHoneypot == true ? "Scam" : "Trustworthy",
       popularity: savedTokenPopularity + 1,
     },
     {
