@@ -27,65 +27,82 @@ mongoose.connect(
 
 // Initialize the bot
 const bot: Telegraf<Context<Update>> = new Telegraf(process.env.TELEGRAM_BOT_TOKEN as string);
-
 console.log(bot);
 
-bot.start((ctx) => {
-    return ctx.replyWithHTML(
-        'Welcome to <b>SAFUSCAN</b> by <i>SAFU.net</i>',
-        Markup.keyboard([
-            ['❓ More Information', '👥 Network', '⭐️ Scan Token']
-        ])
-            .oneTime()
-            .resize()
-    );
-});
+try {
+    bot.start((ctx) => {
+        return ctx.replyWithHTML(
+            'Welcome to <b>SAFUSCAN</b> by <i>SAFU.net</i>',
+            Markup.keyboard([
+                ['❓ More Information', '👥 Network', '⭐️ Scan Token']
+            ])
+                .oneTime()
+                .resize()
+        );
+    });
 
-bot.command('help', async (ctx) => {
-    return await ctx.reply('Select default network',
-        Markup.keyboard([
-            ['❓ More Information', '👥 Network', '⭐️ Scan Token']
-        ])
-            .oneTime()
-            .resize()
-    )
-});
+    bot.command('help', async (ctx) => {
+        return await ctx.reply('To scan a token just enter the Token Contract Address or type /scan and the Token Contract Address(starting with 0x)!',
+            Markup.keyboard([
+                ['❓ More Information', '👥 Network', '⭐️ Scan Token']
+            ])
+                .oneTime()
+                .resize()
+        )
+    });
 
-bot.command('network', (ctx) => {
-    ctx.reply(
-        'Set a default network for scans.',
-        Markup.inlineKeyboard([
-            Markup.button.callback('BSC', 'bsc'),
-            Markup.button.callback('ETH', 'eth'),
-            Markup.button.callback('Polygon', 'matic'),
-        ])
-    );
-});
+    bot.command('network', (ctx) => {
+        ctx.reply(
+            'Set a default network for scans.',
+            Markup.inlineKeyboard([
+                Markup.button.callback('BSC', 'bsc'),
+                Markup.button.callback('ETH', 'eth'),
+                Markup.button.callback('Polygon', 'matic'),
+            ])
+        );
+    });
 
-bot.on('text', (ctx) => {
-
-    if (ctx.message.text == "❓ More Information") {
-        ctx.reply('SAFUSCAN is a code analysis tool and rug detector for token smart contracts!');
-    }
-
-    if (ctx.message.text == "👥 Network") {
-        ctx.reply('Currently active network is BSC - Binance Smart Chain.');
-    }
-
-    if (ctx.message.text == "⭐️ Scan Token") {
-        ctx.reply('Please enter the token contract address to scan! \nIt should start with 0x!');
-    }
-
-    else {
-        // Make sure we start with 0x
-        if (ctx.message.text.substring(0, 2) == "0x") {
-            scanForToken(ctx.message.text, ctx);
+    bot.command('scan', (ctx) => {
+        if (ctx.message.text == "/scan") {
+            ctx.reply(
+                'To scan a token type /scan tokenAddress(starting with 0x)!',
+            );
         }
-    }
+        else {
+            let tokenAddress = ctx.message.text.split(" ")[1];
+            if (tokenAddress.substring(0, 2) == "0x") {
+                scanForToken(ctx.message.text, ctx);
+            }
+        }
+    });
 
-});
+    bot.on('text', (ctx) => {
 
-bot.launch();
+        if (ctx.message.text == "❓ More Information") {
+            ctx.reply('SAFUSCAN is a code analysis tool and rug detector for token smart contracts!');
+        }
+
+        if (ctx.message.text == "👥 Network") {
+            ctx.reply('Currently active network is BSC - Binance Smart Chain.');
+        }
+
+        if (ctx.message.text == "⭐️ Scan Token") {
+            ctx.reply('Please enter the token contract address to scan! \nIt should start with 0x!');
+        }
+
+        else {
+            // Make sure we start with 0x
+            if (ctx.message.text.substring(0, 2) == "0x") {
+                scanForToken(ctx.message.text, ctx);
+            }
+        }
+
+    });
+
+    bot.launch();
+} catch (error) {
+    console.log(error);
+}
 
 async function scanForToken(token_address: string, ctx: any) {
 
