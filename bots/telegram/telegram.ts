@@ -71,7 +71,7 @@ try {
         else {
             let tokenAddress = ctx.message.text.split(" ")[1];
             if (tokenAddress.substring(0, 2) == "0x") {
-                scanForToken(ctx.message.text, ctx);
+                scanForToken(tokenAddress, ctx);
             }
         }
     });
